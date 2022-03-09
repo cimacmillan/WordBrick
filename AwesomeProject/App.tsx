@@ -1,64 +1,41 @@
 import * as React from 'react';
 import { ScrollView, Text, View, Image, TextInput, Button, Animated } from 'react-native';
 import { CharacterButton } from './components/CharacterButton';
+import { Grid } from './components/Grid';
+import { sampleLetter } from './constants/Scrabble';
+
+const GAME_WIDTH = 5;
+const GAME_HEIGHT = 5;
+
+
+interface GameState {
+    tiles: (string | undefined)[][]
+
+}
+
+const getStartingState = (width: number, height: number): GameState => {
+    const tiles = [];
+    for (let y = 0; y < height; y++) {
+        const row = [];
+        for (let x = 0; x < width; x++) {
+            row[x] = sampleLetter();
+        }
+        tiles.push(row);
+    }
+    return {
+        tiles
+    }
+}
 
 const App = () => {
-    const fadeAnim = React.useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
+    const [gameState, setGameState] = React.useState(getStartingState(GAME_WIDTH, GAME_HEIGHT))
 
-    React.useEffect(() => {
-        Animated.timing(
-        fadeAnim,
-        {
-            toValue: 1,
-            duration: 10000,
-            useNativeDriver: true
-        }
-        ).start();
-    }, [fadeAnim]);
-    
     return (
-        <ScrollView>
-            <Animated.View
-                style={{
-                    opacity: fadeAnim,
-                }}
-            >
-                <CharacterButton/>
-                <Text>Some text</Text>
-                <View>
-                    <Text>Some more text</Text>
-                    <Image
-                        source={{
-                            uri: 'https://reactnative.dev/docs/assets/p_cat2.png',
-                        }}
-                        style={{ width: 200, height: 200 }}
-                    />
-                </View>
-                <TextInput
-                    style={{
-                        height: 40,
-                        borderColor: 'gray',
-                        borderWidth: 1
-                    }}
-                    defaultValue="You can type in me"
-                />
-                <Button
-                    onPress={() => {
-                        alert('You tapped the button!');
-                    }}
-                    title="Press Me"
-                    />
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-                <Text style={{fontSize: 40}}>Hello, I am your cat!</Text>
-            </Animated.View>
-        </ScrollView>
+        <>
+            <View style={{flexGrow: 1, justifyContent: "center", alignItems: "center"}}>
+                <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={(x: number, y: number) => <CharacterButton character={gameState.tiles[x][y]}/>}/>
+            </View>
+        </>
     );
 }
 
