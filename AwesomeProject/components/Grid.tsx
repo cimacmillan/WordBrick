@@ -8,7 +8,7 @@ export const Grid: React.FunctionComponent<{
 }> = ({ width, height, renderChild }) => {
     let children = [];
     for (let i = 0; i < height; i++) {
-        children.push(<Row width={width} renderChild={(x) => renderChild(x, i)}/>);
+        children.push(<Row key={i} width={width} renderChild={(x) => renderChild(x, i)}/>);
     }
     return <View style={{ flexDirection: "column" }}>
         { children }
@@ -21,7 +21,7 @@ const Row: React.FunctionComponent<{
 }> = ({width, renderChild}) => {
     let children = [];
     for (let i = 0; i < width; i++) {
-        children.push(renderChild(i));
+        children.push(<View key={i}>{renderChild(i)}</View>);
     }
     return <View style={{ flexDirection: "row" }}>
         { children }
