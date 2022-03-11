@@ -5,8 +5,8 @@ import { Grid } from './components/Grid';
 import { sampleLetter } from './constants/Scrabble';
 import { getLineScore } from './constants/WordAlgorithm';
 
-const GAME_WIDTH = 5;
-const GAME_HEIGHT = 5;
+const GAME_WIDTH = 4;
+const GAME_HEIGHT = 4;
 
 
 interface GameState {
