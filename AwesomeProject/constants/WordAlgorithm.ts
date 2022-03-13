@@ -24,9 +24,9 @@ export function getLineScore(line: (string | undefined)[]): [number, number, num
         }
     }
 
-    for (let i = 0; i < combinations.length; i ++) {
-        console.log(`\"${combinations[i][0]}\"`);
-    }
+    // for (let i = 0; i < combinations.length; i ++) {
+    //     console.log(`\"${combinations[i][0]}\"`);
+    // }
 
     let bestScore = 0;
     let bestBegin = 0;
@@ -38,7 +38,7 @@ export function getLineScore(line: (string | undefined)[]): [number, number, num
 
         const doesContain = AllWords.find(englishWord => englishWord === word);
         if (doesContain && doesContain.length > bestScore) {
-            console.log(doesContain, begin, end);
+            // console.log(doesContain, begin, end);
             bestScore = doesContain.length;
             bestBegin = begin;
             bestEnd = end;

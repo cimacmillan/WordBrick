@@ -13,7 +13,6 @@ interface GameState {
     tiles: (string | undefined)[][];
     currentLetter: string;
     score: number;
-    lastWord: [string, number];
 }
 
 const getStartingState = (width: number, height: number): GameState => {
@@ -30,13 +29,73 @@ const getStartingState = (width: number, height: number): GameState => {
         tiles,
         score: 0,
         currentLetter: sampleLetter(),
-        lastWord: ["", 0]
     }
 }
 
 const App = () => {
     const [gameState, setGameState] = React.useState(getStartingState(GAME_WIDTH, GAME_HEIGHT))
-    const { tiles, score, currentLetter, lastWord } = gameState;
+    const { tiles, score, currentLetter } = gameState;
+
+    const onTilesComplete = () => {
+
+        let newScore = score;
+        const newTiles = [];
+        for (let x = 0; x < GAME_WIDTH; x++) {
+            const row = [];
+            for (let y = 0; y < GAME_HEIGHT; y++) {
+                // row[x] = sampleLetter();
+                row[y] = tiles[x][y];
+            }
+            newTiles.push(row);
+        }
+
+        for (let x = 0; x < GAME_WIDTH; x++) {
+            const vertical = tiles[x];
+            const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
+
+            if (vertScore) {
+                newScore += vertScore;
+                for (let i = vertBegin; i < vertEnd; i++) {
+                    newTiles[x][i] = undefined;
+                }
+            }
+
+        }
+
+        for (let y = 0; y < GAME_HEIGHT; y++) {
+            const horizontal = [];
+            for (let i = 0; i < GAME_WIDTH; i++) {
+                horizontal.push(tiles[i][y]);
+            }
+            const [horizontalScore, horzBegin, horzEnd, horzWord] = getLineScore(horizontal);
+            if (horizontalScore) {
+                newScore += horizontalScore;
+                for (let i = horzBegin; i < horzEnd; i++) {
+                    newTiles[i][y] = undefined;
+                }
+            }
+
+        }
+
+        for (let i = 0; i < GAME_HEIGHT; i++) {
+            for (let y = GAME_HEIGHT-2; y >= 0; y--) {
+                for (let x = 0; x < GAME_WIDTH; x++) {
+                    const upperTile = newTiles[x][y];
+                    const lowerTime = newTiles[x][y + 1];
+                    if ((lowerTime === undefined) && upperTile) {
+                        newTiles[x][y + 1] = newTiles[x][y];
+                        newTiles[x][y] = undefined;
+                    }
+                }
+            }
+        }
+
+        setGameState({
+            tiles: newTiles,
+            score: newScore,
+            currentLetter: sampleLetter(),
+        });
+    }
 
     const onTilePress = (x: number, y: number) => {
         if (tiles[x][y]) {
@@ -45,52 +104,28 @@ const App = () => {
 
         tiles[x][y] = currentLetter;
 
-        const vertical = tiles[x];
-        const horizontal = [];
-
-        for (let i = 0; i < GAME_WIDTH; i++) {
-            horizontal.push(tiles[i][y]);
-        }
-        
-        const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
-        const [horizontalScore, horzBegin, horzEnd, horzWord] = getLineScore(horizontal);
-        let newScore = score;
-
-        if (vertScore) {
-            newScore += vertScore;
-            for (let i = vertBegin; i < vertEnd; i++) {
-                tiles[x][i] = undefined;
-            }
+        let isTileMissing = false;
+        for (let x of tiles) {
+            for (let tile of x) {
+                isTileMissing = isTileMissing || (!tile)
+            } 
         }
 
-        if (horizontalScore) {
-            newScore += horizontalScore;
-            for (let i = horzBegin; i < horzEnd; i++) {
-                tiles[i][y] = undefined;
-            }
+        if (!isTileMissing) {
+            onTilesComplete();
+        } else {
+            setGameState({
+                tiles,
+                currentLetter: sampleLetter(),
+                score
+            });
         }
-
-        let newLastWord = lastWord;
-        if (vertWord) {
-            newLastWord = [vertWord, vertScore];
-        }
-        if (horzWord) {
-            newLastWord = [horzWord, horizontalScore];
-        }
-
-        setGameState({
-            tiles,
-            score: newScore,
-            currentLetter: sampleLetter(),
-            lastWord: newLastWord
-        });
     }
 
     return (
         <>
             <View style={{flexGrow: 1, justifyContent: "center", alignItems: "center"}}>
                 <Text style={{marginBottom: 32, fontSize: 32}}>{score}</Text>
-                { lastWord && (<Text>{lastWord[0]} +{lastWord[1]}</Text>)}
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                     (x: number, y: number) => <CharacterButton character={tiles[x][y]} onPress={() => onTilePress(x, y)}/>
                     }/>
