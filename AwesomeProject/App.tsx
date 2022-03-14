@@ -1,40 +1,19 @@
 import * as React from 'react';
 import { ScrollView, Text, View, Image, TextInput, Button, Animated } from 'react-native';
-import { CharacterButton, CharacterDisplay } from './components/CharacterButton';
-import { Grid } from './components/Grid';
-import { sampleLetter } from './constants/Scrabble';
-import { getLineScore } from './constants/WordAlgorithm';
-
-const GAME_WIDTH = 4;
-const GAME_HEIGHT = 4;
-
-
-interface GameState {
-    tiles: (string | undefined)[][];
-    currentLetter: string;
-    score: number;
-}
-
-const getStartingState = (width: number, height: number): GameState => {
-    const tiles = [];
-    for (let y = 0; y < height; y++) {
-        const row = [];
-        for (let x = 0; x < width; x++) {
-            // row[x] = sampleLetter();
-            row[x] = "";
-        }
-        tiles.push(row);
-    }
-    return {
-        tiles,
-        score: 0,
-        currentLetter: sampleLetter(),
-    }
-}
+import { CharacterButton } from './src/components/CharacterButton';
+import { Grid } from './src/components/Grid';
+import { sampleLetter } from './src/constants/Scrabble';
+import { getLineScore } from './src/constants/WordAlgorithm';
+import { GAME_WIDTH, GAME_HEIGHT } from "./src/Config";
+import { getStartingState } from './src/StateTransition';
+import { AppState, AppStateType, GameStateType } from './src/State';
+import { UnplacedButton } from './src/components/UnplacedButton';
+import { CharacterDisplay } from './src/components/CharacterDisplay';
 
 const App = () => {
-    const [gameState, setGameState] = React.useState(getStartingState(GAME_WIDTH, GAME_HEIGHT))
-    const { tiles, score, currentLetter } = gameState;
+    const [gameState, setGameState] = React.useState<AppState>(getStartingState(GAME_WIDTH, GAME_HEIGHT));
+    const { type, state } = gameState;
+    const { tiles, score, currentLetter, choiceCount } = state;
 
     const onTilesComplete = () => {
 
@@ -90,11 +69,20 @@ const App = () => {
             }
         }
 
-        setGameState({
-            tiles: newTiles,
-            score: newScore,
-            currentLetter: sampleLetter(),
-        });
+        if (score === newScore) {
+            setGameState(getStartingState(GAME_WIDTH, GAME_HEIGHT));
+        } else {
+            setGameState({
+                type: AppStateType.PLAYING,
+                state: {
+                    type: GameStateType.WAITING_FOR_PLACEMENT,
+                    choiceCount: choiceCount + 1,
+                    tiles: newTiles,
+                    score: newScore,
+                    currentLetter: sampleLetter(),
+                }
+            });
+        }
     }
 
     const onTilePress = (x: number, y: number) => {
@@ -115,22 +103,37 @@ const App = () => {
             onTilesComplete();
         } else {
             setGameState({
-                tiles,
-                currentLetter: sampleLetter(),
-                score
+                type: AppStateType.PLAYING,
+                state: {
+                    type: GameStateType.WAITING_FOR_PLACEMENT,
+                    choiceCount: choiceCount + 1,
+                    tiles,
+                    currentLetter: sampleLetter(),
+                    score
+                    
+                }
             });
         }
     }
 
     return (
         <>
-            <View style={{flexGrow: 1, justifyContent: "center", alignItems: "center"}}>
-                <Text style={{marginBottom: 32, fontSize: 32}}>{score}</Text>
+            <View style={{
+                flexGrow: 1, 
+                justifyContent: "center", 
+                alignItems: "center",
+                backgroundColor: "#000000"
+                }}>
+                <Text style={{
+                    marginBottom: 32, 
+                    fontSize: 32,
+                    color: "#FFFFFF"
+                    }}>{score}</Text>
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-                    (x: number, y: number) => <CharacterButton character={tiles[x][y]} onPress={() => onTilePress(x, y)}/>
+                    (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} onPress={() => onTilePress(x, y)}/> : <UnplacedButton onPress={() => onTilePress(x, y)}/>
                     }/>
                 <View style={{ marginTop: 64 }}>
-                    <CharacterDisplay character={currentLetter}/>
+                    <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
                 </View>
             </View>
         </>
