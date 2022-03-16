@@ -13,7 +13,7 @@ const BOUNCE = 0.1;
 const SPEED = 50;
 
 export const CharacterDisplay: React.FunctionComponent<CharacterDisplayProps> = ({ character, choiceCount }) => {
-    const placingAnim = React.useRef(new Animated.Value(ROTATE)).current  // Initial value for opacity: 0
+    const placingAnim = React.useRef(new Animated.Value(ROTATE)).current 
 
     React.useEffect(() => {
         Animated.sequence([

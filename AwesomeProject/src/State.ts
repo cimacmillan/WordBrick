@@ -9,7 +9,7 @@ export enum GameStateType {
     GAME_OVER
 }
 
-interface WaitingForPlacement {
+export interface WaitingForPlacement {
     type: GameStateType.WAITING_FOR_PLACEMENT;
     tiles: GameTiles;
     currentLetter: string;
@@ -17,7 +17,15 @@ interface WaitingForPlacement {
     choiceCount: number;
 }
 
-type GameState = WaitingForPlacement;
+export interface ShowingWords {
+    type: GameStateType.SHOWING_WORDS;
+    previousState: WaitingForPlacement;
+    newScore: number;
+    newTiles: GameTiles;
+}
+
+
+export type GameState = WaitingForPlacement | ShowingWords;
 
 export enum AppStateType {
     PLAYING
