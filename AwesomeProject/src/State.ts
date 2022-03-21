@@ -19,11 +19,9 @@ export interface WaitingForPlacement {
 
 export interface ShowingWords {
     type: GameStateType.SHOWING_WORDS;
-    previousState: WaitingForPlacement;
-    newScore: number;
-    newTiles: GameTiles;
+    previousState: GameState;
     correct: boolean[][];
-    newLetter: string;
+    newState: WaitingForPlacement;
 }
 
 

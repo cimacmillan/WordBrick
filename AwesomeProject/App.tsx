@@ -10,8 +10,28 @@ import { AppState, AppStateType, GameState, GameStateType, ShowingWords, Waiting
 import { UnplacedButton } from './src/components/UnplacedButton';
 import { CharacterDisplay } from './src/components/CharacterDisplay';
 
+const styles = {
+    container: {
+        flexGrow: 1, 
+        justifyContent: "center", 
+        alignItems: "center",
+        backgroundColor: "#000000"
+    },
+    scoreText: {
+        marginBottom: 32, 
+        fontSize: 32,
+        color: "#FFFFFF"
+    },
+    characterDisplay: {
+        marginTop: 64 
+    }
+} as any;
+
 const App = () => {
-    const [appState, setAppState] = React.useState<AppState>(getStartingState(GAME_WIDTH, GAME_HEIGHT));
+    const [appState, setAppState] = React.useState<AppState>({
+        type: AppStateType.PLAYING,
+        state: getStartingState(GAME_WIDTH, GAME_HEIGHT)
+    });
     const setGameState = (state: GameState) => {
         setAppState({
             type: AppStateType.PLAYING,
@@ -40,21 +60,12 @@ const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementP
 
     return (
         <>
-            <View style={{
-                flexGrow: 1, 
-                justifyContent: "center", 
-                alignItems: "center",
-                backgroundColor: "#000000"
-                }}>
-                <Text style={{
-                    marginBottom: 32, 
-                    fontSize: 32,
-                    color: "#FFFFFF"
-                    }}>{score}</Text>
+            <View style={styles.container}>
+                <Text style={styles.scoreText}>{score}</Text>
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                     (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} /> : <UnplacedButton onPress={() => onTilePress(x, y)}/>
                     }/>
-                <View style={{ marginTop: 64 }}>
+                <View style={styles.characterDisplay}>
                     <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
                 </View>
             </View>
@@ -68,36 +79,22 @@ interface ShowingTilesProps {
 }
 
 const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
-    const { newScore, newTiles, previousState, correct, newLetter } = state;
-    const { currentLetter, choiceCount, tiles } = previousState;
+    const { previousState, correct, newState } = state;
+    const { currentLetter, choiceCount, tiles, score } = previousState as WaitingForPlacement;
+    const newScore = (newState as WaitingForPlacement).score;
     React.useEffect(() => {
         setTimeout(() => {
-            setGameState({
-                type: GameStateType.WAITING_FOR_PLACEMENT,
-                tiles: newTiles,
-                currentLetter: newLetter,
-                choiceCount: choiceCount+1,
-                score: newScore
-            })
+            setGameState(newState)
         }, GAME_WORD_SHOW_TIME);
     }, []);
 
     return <>
-        <View style={{
-            flexGrow: 1, 
-            justifyContent: "center", 
-            alignItems: "center",
-            backgroundColor: "#000000"
-            }}>
-        <Text style={{
-            marginBottom: 32, 
-            fontSize: 32,
-            color: "#FFFFFF"
-            }}>{newScore}</Text>
+        <View style={styles.container}>
+        <Text style={styles.scoreText}>{score} + {newScore}</Text>
         <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
             (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
             }/>
-        <View style={{ marginTop: 64 }}>
+        <View style={styles.characterDisplay}>
             <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
         </View>
     </View>

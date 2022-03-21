@@ -72,17 +72,14 @@ function new2DArray<T>(width: number, height: number, newValue: (x: number, y: n
     return tiles;
 }
 
-export function getStartingState(width: number, height: number): AppState {
+export function getStartingState(width: number, height: number): WaitingForPlacement {
     const tiles = new2DArray(width, height, () => "");
     return {
-        type: AppStateType.PLAYING,
-        state: {
-            type: GameStateType.WAITING_FOR_PLACEMENT,
-            tiles,
-            score: 0,
-            currentLetter: sampleLetter(),
-            choiceCount: 0
-        }
+        type: GameStateType.WAITING_FOR_PLACEMENT,
+        tiles,
+        score: 0,
+        currentLetter: sampleLetter(),
+        choiceCount: 0
     }
 }
 
@@ -117,15 +114,24 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
     }
 
     if (score === newScore) {
-        return getStartingState(GAME_WIDTH, GAME_HEIGHT).state;
+        return {
+            type: GameStateType.SHOWING_WORDS,
+            previousState: appState,
+            newState: getStartingState(GAME_WIDTH, GAME_HEIGHT),
+            correct: newCorrect
+        }
     } else {
         return {
             type: GameStateType.SHOWING_WORDS,
             previousState: appState,
-            newTiles: newTiles,
-            newScore: newScore,
-            correct: newCorrect,
-            newLetter: sampleLetter()
+            newState: {
+                type: GameStateType.WAITING_FOR_PLACEMENT,
+                tiles: newTiles,
+                choiceCount: choiceCount + 1,
+                currentLetter: sampleLetter(),
+                score: newScore
+            },
+            correct: newCorrect
         };
     }
 }
