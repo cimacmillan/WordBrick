@@ -100,11 +100,12 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
         return getStartingState(GAME_WIDTH, GAME_HEIGHT).state;
     } else {
         return {
-                type: GameStateType.SHOWING_WORDS,
-                previousState: appState,
-                newTiles: newTiles,
-                newScore: newScore,
-                correct: newCorrect
+            type: GameStateType.SHOWING_WORDS,
+            previousState: appState,
+            newTiles: newTiles,
+            newScore: newScore,
+            correct: newCorrect,
+            newLetter: sampleLetter()
         };
     }
 }

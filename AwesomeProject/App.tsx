@@ -68,15 +68,15 @@ interface ShowingTilesProps {
 }
 
 const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
-    const { newScore, newTiles, previousState, correct } = state;
+    const { newScore, newTiles, previousState, correct, newLetter } = state;
     const { currentLetter, choiceCount, tiles } = previousState;
     React.useEffect(() => {
         setTimeout(() => {
             setGameState({
                 type: GameStateType.WAITING_FOR_PLACEMENT,
                 tiles: newTiles,
-                currentLetter,
-                choiceCount,
+                currentLetter: newLetter,
+                choiceCount: choiceCount+1,
                 score: newScore
             })
         }, 2000);

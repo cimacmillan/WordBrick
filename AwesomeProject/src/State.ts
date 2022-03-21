@@ -23,6 +23,7 @@ export interface ShowingWords {
     newScore: number;
     newTiles: GameTiles;
     correct: boolean[][];
+    newLetter: string;
 }
 
 

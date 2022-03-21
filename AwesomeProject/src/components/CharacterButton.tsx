@@ -17,10 +17,11 @@ const GREEN_GONE = "#6CFF9500";
 const GREY = "#D8D8D8FF";
 
 export const CharacterButton: React.FunctionComponent<CharacterButtonProps> = ({ character, showingCorrect }) => {
-    const placingAnim = React.useRef(new Animated.Value(SIZE)).current  // Initial value for opacity: 0
+    const placingAnim = React.useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
 
     React.useEffect(() => {
         if (showingCorrect === undefined) {
+            placingAnim.setValue(SIZE);
             Animated.sequence([
                 Animated.timing(
                     placingAnim,
