@@ -22,6 +22,7 @@ export interface ShowingWords {
     previousState: WaitingForPlacement;
     newScore: number;
     newTiles: GameTiles;
+    correct: boolean[][];
 }
 
 

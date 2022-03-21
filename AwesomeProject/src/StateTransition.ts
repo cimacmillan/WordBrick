@@ -37,6 +37,15 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
         newTiles.push(row);
     }
 
+    const newCorrect = [];
+    for (let x = 0; x < GAME_WIDTH; x++) {
+        const row = [];
+        for (let y = 0; y < GAME_HEIGHT; y++) {
+            row[y] = false;
+        }
+        newCorrect.push(row);
+    }
+
     for (let x = 0; x < GAME_WIDTH; x++) {
         const vertical = tiles[x];
         const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
@@ -46,6 +55,10 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
             for (let i = vertBegin; i < vertEnd; i++) {
                 newTiles[x][i] = undefined;
             }
+        }
+
+        for (let i = vertBegin; i < vertEnd; i++) {
+            newCorrect[x][i] = true;
         }
 
     }
@@ -61,6 +74,11 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
             for (let i = horzBegin; i < horzEnd; i++) {
                 newTiles[i][y] = undefined;
             }
+        }
+
+
+        for (let i = horzBegin; i < horzEnd; i++) {
+            newCorrect[i][y] = true;
         }
 
     }
@@ -85,7 +103,8 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
                 type: GameStateType.SHOWING_WORDS,
                 previousState: appState,
                 newTiles: newTiles,
-                newScore: newScore
+                newScore: newScore,
+                correct: newCorrect
         };
     }
 }

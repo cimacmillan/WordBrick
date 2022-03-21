@@ -52,7 +52,7 @@ const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementP
                     color: "#FFFFFF"
                     }}>{score}</Text>
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-                    (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} onPress={() => onTilePress(x, y)}/> : <UnplacedButton onPress={() => onTilePress(x, y)}/>
+                    (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} /> : <UnplacedButton onPress={() => onTilePress(x, y)}/>
                     }/>
                 <View style={{ marginTop: 64 }}>
                     <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
@@ -67,21 +67,41 @@ interface ShowingTilesProps {
     state: ShowingWords
 }
 
-const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({}) => {
+const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
+    const { newScore, newTiles, previousState, correct } = state;
+    const { currentLetter, choiceCount, tiles } = previousState;
+    React.useEffect(() => {
+        setTimeout(() => {
+            setGameState({
+                type: GameStateType.WAITING_FOR_PLACEMENT,
+                tiles: newTiles,
+                currentLetter,
+                choiceCount,
+                score: newScore
+            })
+        }, 2000);
+    }, []);
+
     return <>
-            <View style={{
-                flexGrow: 1, 
-                justifyContent: "center", 
-                alignItems: "center",
-                backgroundColor: "#000000"
-                }}>
-                <Text style={{
-                    marginBottom: 32, 
-                    fontSize: 32,
-                    color: "#FFFFFF"
-                    }}>Hello World</Text>
-            </View>
-        </>
+        <View style={{
+            flexGrow: 1, 
+            justifyContent: "center", 
+            alignItems: "center",
+            backgroundColor: "#000000"
+            }}>
+        <Text style={{
+            marginBottom: 32, 
+            fontSize: 32,
+            color: "#FFFFFF"
+            }}>{newScore}</Text>
+        <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
+            (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
+            }/>
+        <View style={{ marginTop: 64 }}>
+            <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
+        </View>
+    </View>
+</>
 }
 
 export default App;
