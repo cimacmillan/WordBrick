@@ -1,5 +1,6 @@
 import React from "react";
 import { Touchable, TouchableHighlight, TouchableWithoutFeedback, View, Text, Animated, Easing } from "react-native";
+import { GAME_WORD_SHOW_TIME } from "../Config";
 
 export interface CharacterButtonProps {
     character?: string; // Undefined character means none
@@ -46,9 +47,8 @@ export const CharacterButton: React.FunctionComponent<CharacterButtonProps> = ({
                 placingAnim,
                 {
                 toValue: 2,
-                duration: 2000,
+                duration: GAME_WORD_SHOW_TIME,
                 useNativeDriver: false,
-                easing: Easing.sin
                 }
             ).start();
         }
@@ -64,8 +64,8 @@ export const CharacterButton: React.FunctionComponent<CharacterButtonProps> = ({
     } else {
         animStyle = {
             backgroundColor: placingAnim.interpolate({
-                inputRange: [0, 1, 2],
-                outputRange:[GREY, showingCorrect ? GREEN : RED, showingCorrect ? GREEN_GONE : GREY]
+                inputRange: [0, 0.5, 1.5, 2],
+                outputRange:[GREY, showingCorrect ? GREEN : RED, showingCorrect ? GREEN : RED, showingCorrect ? GREEN_GONE : GREY]
             }),
             width: SIZE,
             height: SIZE,

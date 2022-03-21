@@ -4,7 +4,7 @@ import { CharacterButton } from './src/components/CharacterButton';
 import { Grid } from './src/components/Grid';
 import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
-import { GAME_WIDTH, GAME_HEIGHT } from "./src/Config";
+import { GAME_WIDTH, GAME_HEIGHT, GAME_WORD_SHOW_TIME } from "./src/Config";
 import { getStartingState, onTilePressed } from './src/StateTransition';
 import { AppState, AppStateType, GameState, GameStateType, ShowingWords, WaitingForPlacement } from './src/State';
 import { UnplacedButton } from './src/components/UnplacedButton';
@@ -79,7 +79,7 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
                 choiceCount: choiceCount+1,
                 score: newScore
             })
-        }, 2000);
+        }, GAME_WORD_SHOW_TIME);
     }, []);
 
     return <>

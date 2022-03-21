@@ -1,18 +1,79 @@
-import { AppState, AppStateType, GameState, GameStateType, WaitingForPlacement } from "./State";
+import { AppState, AppStateType, GameState, GameStateType, GameTiles, WaitingForPlacement } from "./State";
 import { sampleLetter } from './constants/Scrabble';
 import { GAME_HEIGHT, GAME_WIDTH } from "./Config";
 import { getLineScore } from "./constants/WordAlgorithm";
 
-export function getStartingState(width: number, height: number): AppState {
+interface LineScore {
+    x1: number;
+    x2: number;
+    y1: number;
+    y2: number;
+    value: number;
+}
+
+function getRow(tiles: GameTiles, row: number) {
+    const horizontal = [];
+    for (let i = 0; i < GAME_WIDTH; i++) {
+        horizontal.push(tiles[i][row]);
+    }
+    return horizontal;
+}
+
+function getScores(tiles: GameTiles): LineScore[] {
+    const scores: LineScore[] = [];
+    for (let x = 0; x < GAME_WIDTH; x++) {
+        const vertical = tiles[x];
+        const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
+        scores.push({
+            x1: x,
+            x2: x,
+            y1: vertBegin, 
+            y2: vertEnd,
+            value: vertScore
+        });
+    }
+
+    for (let y = 0; y < GAME_HEIGHT; y++) {
+        const horizontal = getRow(tiles, y);
+        const [horizontalScore, horzBegin, horzEnd, horzWord] = getLineScore(horizontal);
+        scores.push({
+            x1: horzBegin,
+            x2: horzEnd,
+            y1: y, 
+            y2: y,
+            value: horizontalScore
+        });
+    }
+    return scores;
+}
+
+// Only for straight lines
+function forLine(x1: number, x2: number, y1: number, y2: number, forEach: (x: number, y: number) => void) {
+    if (x1 === x2) {
+        for (let y = y1; y < y2; y++) {
+            forEach(x1, y);
+        }
+    } else {
+        for (let x = x1; x < x2; x++) {
+            forEach(x, y1);
+        }
+    }
+}
+
+function new2DArray<T>(width: number, height: number, newValue: (x: number, y: number) => T): T[][] {
     const tiles= [];
-    for (let y = 0; y < height; y++) {
+    for (let x = 0; x < GAME_WIDTH; x++) {
         const row = [];
-        for (let x = 0; x < width; x++) {
-            // row[x] = sampleLetter();
-            row[x] = "";
+        for (let y = 0; y < GAME_HEIGHT; y++) {
+            row[y] = newValue(x, y);
         }
         tiles.push(row);
     }
+    return tiles;
+}
+
+export function getStartingState(width: number, height: number): AppState {
+    const tiles = new2DArray(width, height, () => "");
     return {
         type: AppStateType.PLAYING,
         state: {
@@ -28,59 +89,18 @@ export function getStartingState(width: number, height: number): AppState {
 export function onTilesComplete(appState: WaitingForPlacement): GameState {
     const { tiles, currentLetter, choiceCount, score } = appState;
     let newScore = score;
-    const newTiles = [];
-    for (let x = 0; x < GAME_WIDTH; x++) {
-        const row = [];
-        for (let y = 0; y < GAME_HEIGHT; y++) {
-            row[y] = tiles[x][y];
-        }
-        newTiles.push(row);
-    }
 
-    const newCorrect = [];
-    for (let x = 0; x < GAME_WIDTH; x++) {
-        const row = [];
-        for (let y = 0; y < GAME_HEIGHT; y++) {
-            row[y] = false;
-        }
-        newCorrect.push(row);
-    }
+    const newTiles = new2DArray(GAME_WIDTH, GAME_HEIGHT, (x, y) => tiles[x][y]);
+    const newCorrect = new2DArray(GAME_WIDTH, GAME_HEIGHT, (x, y) => false);
+    const scores = getScores(tiles);
 
-    for (let x = 0; x < GAME_WIDTH; x++) {
-        const vertical = tiles[x];
-        const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
-
-        if (vertScore) {
-            newScore += vertScore;
-            for (let i = vertBegin; i < vertEnd; i++) {
-                newTiles[x][i] = undefined;
-            }
-        }
-
-        for (let i = vertBegin; i < vertEnd; i++) {
-            newCorrect[x][i] = true;
-        }
-
-    }
-
-    for (let y = 0; y < GAME_HEIGHT; y++) {
-        const horizontal = [];
-        for (let i = 0; i < GAME_WIDTH; i++) {
-            horizontal.push(tiles[i][y]);
-        }
-        const [horizontalScore, horzBegin, horzEnd, horzWord] = getLineScore(horizontal);
-        if (horizontalScore) {
-            newScore += horizontalScore;
-            for (let i = horzBegin; i < horzEnd; i++) {
-                newTiles[i][y] = undefined;
-            }
-        }
-
-
-        for (let i = horzBegin; i < horzEnd; i++) {
-            newCorrect[i][y] = true;
-        }
-
+    for (const score of scores) {
+        const { x1, x2, y1, y2, value } = score;
+        newScore += value;
+        forLine(x1, x2, y1, y2, (x, y) => {
+            newTiles[x][y] = undefined;
+            newCorrect[x][y] = true;
+        })
     }
 
     for (let i = 0; i < GAME_HEIGHT; i++) {
