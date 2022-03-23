@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { ScrollView, Text, View, Image, TextInput, Button, Animated } from 'react-native';
-import { CharacterButton } from './src/components/CharacterButton';
+import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent } from 'react-native';
 import { Grid } from './src/components/Grid';
 import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
@@ -9,6 +8,9 @@ import { getStartingState, onTilePressed } from './src/StateTransition';
 import { AppState, AppStateType, GameState, GameStateType, ShowingWords, WaitingForPlacement } from './src/State';
 import { UnplacedButton } from './src/components/UnplacedButton';
 import { CharacterDisplay } from './src/components/CharacterDisplay';
+import { Character } from './src/components/Character';
+import { CharacterPlaced } from './src/components/CharacterPlaced';
+import { CharacterResult } from './src/components/CharacterResult';
 
 const styles = {
     container: {
@@ -43,6 +45,8 @@ const App = () => {
             return <WaitingForPlacementComponent setGameState={setGameState} state={appState.state}/>
         case GameStateType.SHOWING_WORDS:
             return <ShowingTilesComponent setGameState={setGameState} state={appState.state}/>
+        case GameStateType.DROPPING_TILES:
+            return <Text>Hello World</Text>
     }
 }
 
@@ -52,18 +56,28 @@ interface WaitingForPlacementProps {
 }
 
 const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementProps> = ({ setGameState, state }) => {
-    const { tiles, score, currentLetter, choiceCount } = state;
+    const { tiles, score, currentLetter, choiceCount, lastPlaced} = state;
 
     const onTilePress = (x: number, y: number) => {
         setGameState(onTilePressed(state, x, y))
     }
+
+    const [lastX, lastY] = lastPlaced || [-1, -1];
 
     return (
         <>
             <View style={styles.container}>
                 <Text style={styles.scoreText}>{score}</Text>
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-                    (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} /> : <UnplacedButton onPress={() => onTilePress(x, y)}/>
+                    (x: number, y: number) => {
+                        const wasLastPlaced = x === lastX && y === lastY;
+                        const isPlaced = !!tiles[x][y];
+                        if (isPlaced) {
+                            return wasLastPlaced ? <CharacterPlaced character={tiles[x][y]}/> : <Character character={tiles[x][y]}/>
+                        } else {
+                            return <UnplacedButton onPress={() => onTilePress(x, y)}/>
+                        }
+                    }
                     }/>
                 <View style={styles.characterDisplay}>
                     <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
@@ -92,7 +106,7 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
         <View style={styles.container}>
         <Text style={styles.scoreText}>{score} + {newScore}</Text>
         <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-            (x: number, y: number) => tiles[x][y] ? <CharacterButton character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
+            (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
             }/>
         <View style={styles.characterDisplay}>
             <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>

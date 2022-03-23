@@ -1,6 +1,13 @@
 
 export type GameTiles = (string | undefined)[][];
 
+export interface FallingTile {
+    character?: string;
+    height: number;
+}
+
+export type FallingTiles = FallingTile[][];
+
 export enum GameStateType {
     WAITING_FOR_PLACEMENT,
     SHOWING_WORDS,
@@ -9,23 +16,29 @@ export enum GameStateType {
     GAME_OVER
 }
 
+export interface FallingTilesState {
+    type: GameStateType.DROPPING_TILES;
+    tiles: FallingTiles;
+}
+
 export interface WaitingForPlacement {
     type: GameStateType.WAITING_FOR_PLACEMENT;
     tiles: GameTiles;
     currentLetter: string;
     score: number;
     choiceCount: number;
+    lastPlaced?: [x: number, y: number]
 }
 
 export interface ShowingWords {
     type: GameStateType.SHOWING_WORDS;
     previousState: GameState;
     correct: boolean[][];
-    newState: WaitingForPlacement;
+    newState: WaitingForPlacement | FallingTilesState;
 }
 
 
-export type GameState = WaitingForPlacement | ShowingWords;
+export type GameState = WaitingForPlacement | ShowingWords | FallingTilesState;
 
 export enum AppStateType {
     PLAYING
