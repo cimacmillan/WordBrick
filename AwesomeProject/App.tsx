@@ -5,12 +5,13 @@ import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
 import { GAME_WIDTH, GAME_HEIGHT, GAME_WORD_SHOW_TIME } from "./src/Config";
 import { getStartingState, onTilePressed } from './src/StateTransition';
-import { AppState, AppStateType, GameState, GameStateType, ShowingWords, WaitingForPlacement } from './src/State';
+import { AppState, AppStateType, FallingTilesState, GameState, GameStateType, ShowingWords, WaitingForPlacement } from './src/State';
 import { UnplacedButton } from './src/components/UnplacedButton';
 import { CharacterDisplay } from './src/components/CharacterDisplay';
 import { Character } from './src/components/Character';
 import { CharacterPlaced } from './src/components/CharacterPlaced';
 import { CharacterResult } from './src/components/CharacterResult';
+import { CharacterFalling } from './src/components/CharacterFalling';
 
 const styles = {
     container: {
@@ -46,7 +47,7 @@ const App = () => {
         case GameStateType.SHOWING_WORDS:
             return <ShowingTilesComponent setGameState={setGameState} state={appState.state}/>
         case GameStateType.DROPPING_TILES:
-            return <Text>Hello World</Text>
+            return <FallingTilesComponent setGameState={setGameState} state={appState.state}/>
     }
 }
 
@@ -113,6 +114,29 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
         </View>
     </View>
 </>
+}
+
+interface FallingTilesProps {
+    setGameState: (state: GameState) => void;
+    state: FallingTilesState
+}
+
+const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ setGameState, state }) => {
+    const { tiles } = state;
+
+    console.log(tiles);
+
+    return (<>
+        <View style={styles.container}>
+            {/* <Text style={styles.scoreText}>{score} + {newScore}</Text> */}
+            <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
+                (x: number, y: number) => tiles[x][y].character ? <CharacterFalling character={tiles[x][y].character!} height={tiles[x][y].height} /> : <UnplacedButton onPress={() => undefined}/>
+                }/>
+            {/* <View style={styles.characterDisplay}>
+                <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
+            </View> */}
+        </View>
+    </>)
 }
 
 export default App;

@@ -104,10 +104,13 @@ export function canTilesFall(tiles: GameTiles): boolean {
     return canFall;
 }
 
-export function getDropLine(tiles: GameTiles, x: number, y: number): number {
+export function getDropLine(tiles: FallingTiles, x: number, y: number): number {
     let drop = 0;
-    for(let yDiff = 0; yDiff < GAME_HEIGHT - 1; yDiff++) {
-        if (tiles[x][y + yDiff]) {
+    for(let yDiff = 1; yDiff < GAME_HEIGHT; yDiff++) {
+        if (y + yDiff >= GAME_HEIGHT) {
+            return drop;
+        }
+        if (tiles[x][y + yDiff].character) {
             break;
         }
         drop++;
@@ -116,7 +119,7 @@ export function getDropLine(tiles: GameTiles, x: number, y: number): number {
 }
 
 export function getFallingTiles(tiles: GameTiles): FallingTiles {
-    const newTiles: (FallingTile | undefined)[][] = new2DArray(GAME_WIDTH, GAME_HEIGHT, (x, y) => undefined)
+    const newTiles: (FallingTile)[][] = new2DArray(GAME_WIDTH, GAME_HEIGHT, (x, y) => ({ character: tiles[x][y], height: 0 }))
     for (let x = 0; x < GAME_WIDTH; x++) {
         for (let y = GAME_HEIGHT - 1; y >= 0; y--) {
             if (y === GAME_HEIGHT - 1) {
@@ -127,9 +130,16 @@ export function getFallingTiles(tiles: GameTiles): FallingTiles {
                 continue;
             }
 
-            newTiles[x][y] = {
-                character: tiles[x][y],
-                height: getDropLine(tiles, x, y)
+            const dropLine = getDropLine(newTiles, x, y);
+            if (dropLine) {
+                newTiles[x][y + dropLine] = {
+                    character: newTiles[x][y].character,
+                    height: dropLine
+                }
+                newTiles[x][y] = {
+                    character: undefined,
+                    height: 0
+                };
             }
         }
     }

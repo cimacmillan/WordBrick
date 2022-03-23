@@ -13,7 +13,7 @@ const BOUNCE = -8;
 const SPEED = 100;
 
 const GREEN = "#6CFF95FF";
-// const RED = "#FF4D4DFF";
+const RED = "#FF4D4DFF";
 const GREEN_GONE = "#6CFF9500";
 const GREY = "#D8D8D8FF";
 
@@ -34,7 +34,7 @@ export const CharacterResult: React.FunctionComponent<CharacterButtonProps> = ({
     const animStyle = {
         backgroundColor: placingAnim.interpolate({
             inputRange: [0, 0.5, 1.5, 2],
-            outputRange:[GREY, showingCorrect ? GREEN : GREY, showingCorrect ? GREEN : GREY, showingCorrect ? GREEN_GONE : GREY]
+            outputRange:[GREY, showingCorrect ? GREEN : RED, showingCorrect ? GREEN : RED, showingCorrect ? GREEN_GONE : GREY]
         })
     };
 
