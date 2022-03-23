@@ -9,16 +9,19 @@ export interface CharacterFallingProps {
     height: number;
 }
 
-const SPEED = 200;
+export const FALL_SPEED = 200;
 
 export const CharacterFalling: React.FunctionComponent<CharacterFallingProps> = ({ character, height }) => {
     const placingAnim = React.useRef(new Animated.Value(-height * CHARACTER_SIZE)).current  // Initial value for opacity: 0
     React.useEffect(() => {
+        if (height === 0) {
+            return;
+        }
         Animated.timing(
             placingAnim,
             {
             toValue: 0,
-            duration: SPEED,
+            duration: FALL_SPEED * height,
             useNativeDriver: false
             }
         ).start();

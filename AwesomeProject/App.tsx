@@ -4,14 +4,14 @@ import { Grid } from './src/components/Grid';
 import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
 import { GAME_WIDTH, GAME_HEIGHT, GAME_WORD_SHOW_TIME } from "./src/Config";
-import { getStartingState, onTilePressed } from './src/StateTransition';
+import { getStartingState, onTilePressed, onTilesFell } from './src/StateTransition';
 import { AppState, AppStateType, FallingTilesState, GameState, GameStateType, ShowingWords, WaitingForPlacement } from './src/State';
 import { UnplacedButton } from './src/components/UnplacedButton';
 import { CharacterDisplay } from './src/components/CharacterDisplay';
 import { Character } from './src/components/Character';
 import { CharacterPlaced } from './src/components/CharacterPlaced';
 import { CharacterResult } from './src/components/CharacterResult';
-import { CharacterFalling } from './src/components/CharacterFalling';
+import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling';
 
 const styles = {
     container: {
@@ -122,19 +122,23 @@ interface FallingTilesProps {
 }
 
 const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ setGameState, state }) => {
-    const { tiles } = state;
+    const { tiles, score, currentLetter, choiceCount } = state;
 
-    console.log(tiles);
+    React.useEffect(() => {
+        setTimeout(() => {
+            setGameState(onTilesFell(state));
+        }, FALL_SPEED * GAME_HEIGHT);
+    }, [])
 
     return (<>
         <View style={styles.container}>
-            {/* <Text style={styles.scoreText}>{score} + {newScore}</Text> */}
+            <Text style={styles.scoreText}>{score}</Text>
             <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                 (x: number, y: number) => tiles[x][y].character ? <CharacterFalling character={tiles[x][y].character!} height={tiles[x][y].height} /> : <UnplacedButton onPress={() => undefined}/>
                 }/>
-            {/* <View style={styles.characterDisplay}>
+            <View style={styles.characterDisplay}>
                 <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
-            </View> */}
+            </View>
         </View>
     </>)
 }

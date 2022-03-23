@@ -68,6 +68,16 @@ function forEach2DArray(width: number, height: number, forEach: (x: number, y: n
     }
 }
 
+function map2DArray<A, B>(array: A[][], width: number, height: number, map: (value: A, x: number, y: number) => B): B[][] {
+    const newArray: (B | undefined)[][] = new2DArray(width, height, () => undefined);
+    for (let x = 0; x < GAME_WIDTH; x++) {
+        for (let y = 0; y < GAME_HEIGHT; y++) {
+            newArray[x][y] = map(array[x][y], x, y);
+        }
+    }
+    return newArray as B[][];
+}
+
 function new2DArray<T>(width: number, height: number, newValue: (x: number, y: number) => T): T[][] {
     const tiles= [];
     for (let x = 0; x < GAME_WIDTH; x++) {
@@ -165,7 +175,10 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
 
     const newGameState: WaitingForPlacement | FallingTilesState = canTilesFall(newTiles) ? {
         type: GameStateType.DROPPING_TILES,
-        tiles: getFallingTiles(newTiles)
+        tiles: getFallingTiles(newTiles),
+        choiceCount: choiceCount + 1,
+        currentLetter: sampleLetter(),
+        score: newScore
     } : {
         type: GameStateType.WAITING_FOR_PLACEMENT,
         tiles: newTiles,
@@ -218,5 +231,29 @@ export function onTilePressed(appState: WaitingForPlacement, x: number, y: numbe
             lastPlaced: [x, y]
         };
     }
+}
+
+export function onTilesFell(appState: FallingTilesState): GameState {
+    const { tiles, currentLetter, choiceCount, score } = appState;
+    const gameTiles: GameTiles = map2DArray(tiles, GAME_WIDTH, GAME_HEIGHT, (tile) => tile.character)
+    const scores = getScores(gameTiles).reduce((prev, val) => prev + val.value, 0);
+
+    if (scores > 0) {
+        return onTilesComplete({
+            type: GameStateType.WAITING_FOR_PLACEMENT,
+            tiles: gameTiles,
+            currentLetter,
+            choiceCount, 
+            score
+        });
+    }
+
+    return {
+        type: GameStateType.WAITING_FOR_PLACEMENT,
+        tiles: gameTiles,
+        currentLetter,
+        choiceCount, 
+        score
+    };
 }
 

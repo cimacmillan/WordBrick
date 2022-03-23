@@ -19,6 +19,9 @@ export enum GameStateType {
 export interface FallingTilesState {
     type: GameStateType.DROPPING_TILES;
     tiles: FallingTiles;
+    currentLetter: string;
+    choiceCount: number;
+    score: number;
 }
 
 export interface WaitingForPlacement {
