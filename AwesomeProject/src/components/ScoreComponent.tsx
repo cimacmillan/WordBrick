@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View, ViewStyle } from 'react-native';
+import { Text, TextStyle, View, ViewStyle } from 'react-native';
 import { GAME_WIDTH } from '../Config';
 import { CharacterStyles, CHARACTER_SIZE } from './CharacterStyles';
 
@@ -15,7 +15,7 @@ const styles = {
         marginBottom: 32, 
         fontSize: 32,
         color: "#FFFFFF"
-    }
+    } as TextStyle
 };
 
 interface ScoreComponentProps {
