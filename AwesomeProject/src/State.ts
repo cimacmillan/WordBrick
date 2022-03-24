@@ -22,6 +22,7 @@ export interface FallingTilesState {
     currentLetter: string;
     choiceCount: number;
     score: number;
+    bestScore: number;
 }
 
 export interface WaitingForPlacement {
@@ -30,7 +31,8 @@ export interface WaitingForPlacement {
     currentLetter: string;
     score: number;
     choiceCount: number;
-    lastPlaced?: [x: number, y: number]
+    lastPlaced?: [x: number, y: number];
+    bestScore: number;
 }
 
 export interface ShowingWords {
@@ -38,6 +40,7 @@ export interface ShowingWords {
     previousState: GameState;
     correct: boolean[][];
     newState: WaitingForPlacement | FallingTilesState;
+    bestScore: number;
 }
 
 

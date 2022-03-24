@@ -29,7 +29,7 @@ const styles = {
 const App = () => {
     const [appState, setAppState] = React.useState<AppState>({
         type: AppStateType.PLAYING,
-        state: getStartingState(GAME_WIDTH, GAME_HEIGHT)
+        state: getStartingState(GAME_WIDTH, GAME_HEIGHT, 0)
     });
     const setGameState = (state: GameState) => {
         setAppState({
@@ -53,7 +53,7 @@ interface WaitingForPlacementProps {
 }
 
 const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementProps> = ({ setGameState, state }) => {
-    const { tiles, score, currentLetter, choiceCount, lastPlaced} = state;
+    const { tiles, score, currentLetter, choiceCount, lastPlaced, bestScore } = state;
 
     const onTilePress = (x: number, y: number) => {
         setGameState(onTilePressed(state, x, y))
@@ -64,7 +64,7 @@ const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementP
     return (
         <>
             <View style={styles.container}>
-                <ScoreComponent score={score}/>
+                <ScoreComponent score={score} bestScore={bestScore}/>
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                     (x: number, y: number) => {
                         const wasLastPlaced = x === lastX && y === lastY;
@@ -90,7 +90,7 @@ interface ShowingTilesProps {
 }
 
 const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
-    const { previousState, correct, newState } = state;
+    const { previousState, correct, newState, bestScore } = state;
     const { tiles, score } = previousState as WaitingForPlacement;
     const { currentLetter, choiceCount } = newState;
     const newScore = (newState as WaitingForPlacement).score;
@@ -102,7 +102,7 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
 
     return <>
         <View style={styles.container}>
-        <ScoreComponent score={score} newScore={newScore}/>
+        <ScoreComponent score={score} newScore={newScore} bestScore={bestScore} />
         <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
             (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
             }/>
@@ -119,7 +119,7 @@ interface FallingTilesProps {
 }
 
 const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ setGameState, state }) => {
-    const { tiles, score, currentLetter, choiceCount } = state;
+    const { tiles, score, currentLetter, choiceCount, bestScore } = state;
 
     React.useEffect(() => {
         setTimeout(() => {
@@ -129,7 +129,7 @@ const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ set
 
     return (<>
         <View style={styles.container}>
-            <ScoreComponent score={score}/>
+            <ScoreComponent score={score} bestScore={bestScore} />
             <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                 (x: number, y: number) => tiles[x][y].character ? <CharacterFalling character={tiles[x][y].character!} height={tiles[x][y].height} /> : <UnplacedButton onPress={() => undefined}/>
                 }/>
