@@ -3,6 +3,7 @@ import { Touchable, TouchableHighlight, TouchableWithoutFeedback, View, Text, An
 import { GAME_WORD_SHOW_TIME } from "../Config";
 import { CharacterStyles, CHARACTER_SIZE } from "./CharacterStyles";
 import { ViewProps } from "./Themed";
+import { UnplacedButton } from "./UnplacedButton";
 
 export interface CharacterFallingProps {
     character: string; // Undefined character means none
@@ -32,10 +33,15 @@ export const CharacterFalling: React.FunctionComponent<CharacterFallingProps> = 
     }
 
     return (
+        <>
+        <View style={{position: "absolute"}}>
+            <UnplacedButton onPress={() => undefined}/>
+        </View>
         <View style={CharacterStyles.characterContainer}>
             <Animated.View style={{...CharacterStyles.characterBlock, ...animStyle }}>
                 <Text style={CharacterStyles.characterText}>{character}</Text>
             </Animated.View>  
         </View>
+        </>
     );
 } 

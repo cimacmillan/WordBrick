@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent } from 'react-native';
+import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle } from 'react-native';
 import { Grid } from './src/components/Grid';
 import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
@@ -12,6 +12,7 @@ import { Character } from './src/components/Character';
 import { CharacterPlaced } from './src/components/CharacterPlaced';
 import { CharacterResult } from './src/components/CharacterResult';
 import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling';
+import { ScoreComponent } from './src/components/ScoreComponent';
 
 const styles = {
     container: {
@@ -19,16 +20,11 @@ const styles = {
         justifyContent: "center", 
         alignItems: "center",
         backgroundColor: "#000000"
-    },
-    scoreText: {
-        marginBottom: 32, 
-        fontSize: 32,
-        color: "#FFFFFF"
-    },
+    } as ViewStyle,
     characterDisplay: {
         marginTop: 64 
     }
-} as any;
+};
 
 const App = () => {
     const [appState, setAppState] = React.useState<AppState>({
@@ -68,7 +64,7 @@ const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementP
     return (
         <>
             <View style={styles.container}>
-                <Text style={styles.scoreText}>{score}</Text>
+                <ScoreComponent score={score}/>
                 <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                     (x: number, y: number) => {
                         const wasLastPlaced = x === lastX && y === lastY;
@@ -95,7 +91,8 @@ interface ShowingTilesProps {
 
 const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
     const { previousState, correct, newState } = state;
-    const { currentLetter, choiceCount, tiles, score } = previousState as WaitingForPlacement;
+    const { tiles, score } = previousState as WaitingForPlacement;
+    const { currentLetter, choiceCount } = newState;
     const newScore = (newState as WaitingForPlacement).score;
     React.useEffect(() => {
         setTimeout(() => {
@@ -105,7 +102,7 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
 
     return <>
         <View style={styles.container}>
-        <Text style={styles.scoreText}>{score} + {newScore}</Text>
+        <ScoreComponent score={score} newScore={newScore}/>
         <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
             (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
             }/>
@@ -132,7 +129,7 @@ const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ set
 
     return (<>
         <View style={styles.container}>
-            <Text style={styles.scoreText}>{score}</Text>
+            <ScoreComponent score={score}/>
             <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
                 (x: number, y: number) => tiles[x][y].character ? <CharacterFalling character={tiles[x][y].character!} height={tiles[x][y].height} /> : <UnplacedButton onPress={() => undefined}/>
                 }/>
