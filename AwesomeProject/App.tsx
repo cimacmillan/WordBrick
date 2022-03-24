@@ -5,7 +5,7 @@ import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
 import { GAME_WIDTH, GAME_HEIGHT, GAME_WORD_SHOW_TIME } from "./src/Config";
 import { getStartingState, onTilePressed, onTilesFell } from './src/StateTransition';
-import { AppState, AppStateType, FallingTilesState, GameState, GameStateType, ShowingWords, WaitingForPlacement } from './src/State';
+import { AppState, AppStateType, FallingTilesState, GameState, GameStateType, PlayingState, ShowingWords, WaitingForPlacement } from './src/State';
 import { UnplacedButton } from './src/components/UnplacedButton';
 import { CharacterDisplay } from './src/components/CharacterDisplay';
 import { Character } from './src/components/Character';
@@ -13,6 +13,7 @@ import { CharacterPlaced } from './src/components/CharacterPlaced';
 import { CharacterResult } from './src/components/CharacterResult';
 import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling';
 import { ScoreComponent } from './src/components/ScoreComponent';
+import { getBestScore } from './src/Util';
 
 const styles = {
     container: {
@@ -28,23 +29,41 @@ const styles = {
 
 const App = () => {
     const [appState, setAppState] = React.useState<AppState>({
-        type: AppStateType.PLAYING,
-        state: getStartingState(GAME_WIDTH, GAME_HEIGHT, 0)
+        type: AppStateType.LOADING
     });
+
+    React.useEffect(() => {
+        getBestScore().then((score) => {
+            setAppState({
+                type: AppStateType.PLAYING,
+                state: getStartingState(GAME_WIDTH, GAME_HEIGHT, score),
+                loadedBestScore: score
+            })
+        });
+    }, [])
+
     const setGameState = (state: GameState) => {
         setAppState({
             type: AppStateType.PLAYING,
-            state
+            state,
+            loadedBestScore: (appState as PlayingState).loadedBestScore
         })
     }
-    switch(appState.state.type) {
-        case GameStateType.WAITING_FOR_PLACEMENT:
-            return <WaitingForPlacementComponent setGameState={setGameState} state={appState.state}/>
-        case GameStateType.SHOWING_WORDS:
-            return <ShowingTilesComponent setGameState={setGameState} state={appState.state}/>
-        case GameStateType.DROPPING_TILES:
-            return <FallingTilesComponent setGameState={setGameState} state={appState.state}/>
+
+    switch(appState.type) {
+        case AppStateType.PLAYING:
+            switch(appState.state.type) {
+                case GameStateType.WAITING_FOR_PLACEMENT:
+                    return <WaitingForPlacementComponent setGameState={setGameState} state={appState.state}/>
+                case GameStateType.SHOWING_WORDS:
+                    return <ShowingTilesComponent setGameState={setGameState} state={appState.state}/>
+                case GameStateType.DROPPING_TILES:
+                    return <FallingTilesComponent setGameState={setGameState} state={appState.state}/>
+            }
+        case AppStateType.LOADING:
+            return <View/>
     }
+
 }
 
 interface WaitingForPlacementProps {

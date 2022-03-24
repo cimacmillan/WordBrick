@@ -2,6 +2,7 @@ import { AppState, AppStateType, FallingTile, FallingTiles, FallingTilesState, G
 import { sampleLetter } from './constants/Scrabble';
 import { GAME_HEIGHT, GAME_WIDTH } from "./Config";
 import { getLineScore } from "./constants/WordAlgorithm";
+import { setBestScore } from "./Util";
 
 interface LineScore {
     x1: number;
@@ -106,7 +107,6 @@ export function canTilesFall(tiles: GameTiles): boolean {
     let canFall = false;
     forEach2DArray(GAME_WIDTH, GAME_HEIGHT, (x, y) => {
         if (y < GAME_HEIGHT - 1) {
-            console.log(x, y, tiles[x][y], tiles[x][y + 1]);
             if (tiles[x][y] && !tiles[x][y + 1]) {
                 canFall = true;
             }
@@ -192,6 +192,7 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
 
     if (score === newScore) {
         const newBestScore = score > bestScore ? score : bestScore;
+        setBestScore(newBestScore);
         return {
             type: GameStateType.SHOWING_WORDS,
             previousState: appState,

@@ -47,16 +47,22 @@ export interface ShowingWords {
 export type GameState = WaitingForPlacement | ShowingWords | FallingTilesState;
 
 export enum AppStateType {
-    PLAYING
+    PLAYING,
+    LOADING
 }
 
-interface PlayingState {
+export interface PlayingState {
     type: AppStateType.PLAYING;
     state: GameState;
+    loadedBestScore: number;
+}
+
+interface LoadingState {
+    type: AppStateType.LOADING;
 }
 
 
-export type AppState = PlayingState;
+export type AppState = PlayingState | LoadingState;
 
 
 
