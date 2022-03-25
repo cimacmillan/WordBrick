@@ -157,7 +157,7 @@ export function getFallingTiles(tiles: GameTiles): FallingTiles {
     return newTiles as FallingTiles;
 }
 
-export function onTilesComplete(appState: WaitingForPlacement): GameState {
+export function onTilesComplete(appState: WaitingForPlacement, hasFallen: boolean): GameState {
     const { tiles, currentLetter, choiceCount, score, bestScore } = appState;
     let newScore = score;
 
@@ -167,14 +167,21 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
 
     for (const score of scores) {
         const { x1, x2, y1, y2, value } = score;
-        newScore += value;
+        newScore += hasFallen ? value * value : value;
         forLine(x1, x2, y1, y2, (x, y) => {
             newTiles[x][y] = undefined;
             newCorrect[x][y] = true;
         })
     }
 
-    const newGameState: WaitingForPlacement | FallingTilesState = canTilesFall(newTiles) ? {
+    const newGameState: WaitingForPlacement | FallingTilesState = hasFallen ? {
+        type: GameStateType.WAITING_FOR_PLACEMENT,
+        tiles: new2DArray(GAME_WIDTH, GAME_HEIGHT, () => undefined),
+        choiceCount: choiceCount + 1,
+        currentLetter: sampleLetter(),
+        score: newScore,
+        bestScore
+    } : (canTilesFall(newTiles) ?  {
         type: GameStateType.DROPPING_TILES,
         tiles: getFallingTiles(newTiles),
         choiceCount: choiceCount + 1,
@@ -188,7 +195,7 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
         currentLetter: sampleLetter(),
         score: newScore,
         bestScore
-    };
+    });
 
     if (score === newScore) {
         const newBestScore = score > bestScore ? score : bestScore;
@@ -198,7 +205,8 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
             previousState: appState,
             newState: getStartingState(GAME_WIDTH, GAME_HEIGHT, newBestScore),
             correct: newCorrect,
-            bestScore: newBestScore
+            bestScore: newBestScore,
+            hasFallen: false
         }
     } else {
         return {
@@ -206,7 +214,8 @@ export function onTilesComplete(appState: WaitingForPlacement): GameState {
             previousState: appState,
             newState: newGameState,
             correct: newCorrect,
-            bestScore
+            bestScore,
+            hasFallen
         };
     }
 }
@@ -227,7 +236,7 @@ export function onTilePressed(appState: WaitingForPlacement, x: number, y: numbe
     }
 
     if (!isTileMissing) {
-        return onTilesComplete(appState);
+        return onTilesComplete(appState, false);
     } else {
         return {
             type: GameStateType.WAITING_FOR_PLACEMENT,
@@ -253,8 +262,8 @@ export function onTilesFell(appState: FallingTilesState): GameState {
             currentLetter,
             choiceCount, 
             score,
-            bestScore
-        });
+            bestScore,
+        }, true);
     }
 
     return {

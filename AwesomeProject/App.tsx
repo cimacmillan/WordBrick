@@ -10,7 +10,7 @@ import { UnplacedButton } from './src/components/UnplacedButton';
 import { CharacterDisplay } from './src/components/CharacterDisplay';
 import { Character } from './src/components/Character';
 import { CharacterPlaced } from './src/components/CharacterPlaced';
-import { CharacterResult } from './src/components/CharacterResult';
+import { CharacterResult, CharacterResultEnum } from './src/components/CharacterResult';
 import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling';
 import { ScoreComponent } from './src/components/ScoreComponent';
 import { getBestScore } from './src/Util';
@@ -109,7 +109,7 @@ interface ShowingTilesProps {
 }
 
 const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
-    const { previousState, correct, newState, bestScore } = state;
+    const { previousState, correct, newState, bestScore, hasFallen } = state;
     const { tiles, score } = previousState as WaitingForPlacement;
     const { currentLetter, choiceCount } = newState;
     const newScore = (newState as WaitingForPlacement).score;
@@ -119,11 +119,33 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
         }, GAME_WORD_SHOW_TIME);
     }, []);
 
+    const isEndGame = newScore === 0;
+
+    const getCharacterResultEnum = (isCorrect: boolean): CharacterResultEnum => {
+        if (isEndGame) {
+            return CharacterResultEnum.SHOWING_WRONG_END_GAME;
+        }
+
+        if (hasFallen) {
+            if (isCorrect) {
+                return CharacterResultEnum.SHOWING_CORRECT_AFTER_FALL;
+            } else {
+                return CharacterResultEnum.SHOWING_WRONG_AFTER_FALL;
+            }
+        }
+
+        if (isCorrect) {
+            return CharacterResultEnum.SHOWING_CORRECT;
+        } else {
+            return CharacterResultEnum.SHOWING_WRONG_MID_GAME;
+        }
+    }
+
     return <>
         <View style={styles.container}>
         <ScoreComponent score={score} newScore={newScore} bestScore={bestScore} />
         <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-            (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]} showingCorrect={correct[x][y]} endOfGame={newScore === 0}/> : <UnplacedButton onPress={() => undefined}/>
+            (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]!} characterResult={getCharacterResultEnum(correct[x][y])}/> : <UnplacedButton onPress={() => undefined}/>
             }/>
         <View style={styles.characterDisplay}>
             <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
