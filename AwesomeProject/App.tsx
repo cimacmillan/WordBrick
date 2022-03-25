@@ -123,7 +123,7 @@ const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ set
         <View style={styles.container}>
         <ScoreComponent score={score} newScore={newScore} bestScore={bestScore} />
         <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-            (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]} showingCorrect={correct[x][y]}/> : <UnplacedButton onPress={() => undefined}/>
+            (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]} showingCorrect={correct[x][y]} endOfGame={newScore === 0}/> : <UnplacedButton onPress={() => undefined}/>
             }/>
         <View style={styles.characterDisplay}>
             <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
