@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle } from 'react-native';
+import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle, Dimensions } from 'react-native';
 import { Grid } from './src/components/Grid';
 import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
@@ -14,6 +14,7 @@ import { CharacterResult, CharacterResultEnum } from './src/components/Character
 import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling';
 import { ScoreComponent } from './src/components/ScoreComponent';
 import { getBestScore } from './src/Util';
+import GameComponent from './src/GameComponent';
 
 const styles = {
     container: {
@@ -50,135 +51,28 @@ const App = () => {
         })
     }
 
-    switch(appState.type) {
-        case AppStateType.PLAYING:
-            switch(appState.state.type) {
-                case GameStateType.WAITING_FOR_PLACEMENT:
-                    return <WaitingForPlacementComponent setGameState={setGameState} state={appState.state}/>
-                case GameStateType.SHOWING_WORDS:
-                    return <ShowingTilesComponent setGameState={setGameState} state={appState.state}/>
-                case GameStateType.DROPPING_TILES:
-                    return <FallingTilesComponent setGameState={setGameState} state={appState.state}/>
-            }
-        case AppStateType.LOADING:
-            return <View/>
+    const onScorePressed = () => {
+        console.log("On previous words")
+        setAppState({
+            type: AppStateType.SHOW_PREVIOUS_WORDS,
+            state: (appState as PlayingState).state,
+            loadedBestScore: (appState as PlayingState).loadedBestScore
+        })
     }
 
-}
 
-interface WaitingForPlacementProps {
-    setGameState: (state: GameState) => void;
-    state: WaitingForPlacement
-}
-
-const WaitingForPlacementComponent: React.FunctionComponent<WaitingForPlacementProps> = ({ setGameState, state }) => {
-    const { tiles, score, currentLetter, choiceCount, lastPlaced, bestScore } = state;
-
-    const onTilePress = (x: number, y: number) => {
-        setGameState(onTilePressed(state, x, y))
+    if (appState.type === AppStateType.LOADING) {
+        return <View/>;
     }
 
-    const [lastX, lastY] = lastPlaced || [-1, -1];
 
-    return (
-        <>
-            <View style={styles.container}>
-                <ScoreComponent score={score} bestScore={bestScore}/>
-                <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-                    (x: number, y: number) => {
-                        const wasLastPlaced = x === lastX && y === lastY;
-                        const isPlaced = !!tiles[x][y];
-                        if (isPlaced) {
-                            return wasLastPlaced ? <CharacterPlaced character={tiles[x][y]}/> : <Character character={tiles[x][y]}/>
-                        } else {
-                            return <UnplacedButton onPress={() => onTilePress(x, y)}/>
-                        }
-                    }
-                    }/>
-                <View style={styles.characterDisplay}>
-                    <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
-                </View>
-            </View>
-        </>
-    );
-}
 
-interface ShowingTilesProps {
-    setGameState: (state: GameState) => void;
-    state: ShowingWords
-}
-
-const ShowingTilesComponent: React.FunctionComponent<ShowingTilesProps> = ({ setGameState, state }) => {
-    const { previousState, correct, newState, bestScore, hasFallen } = state;
-    const { tiles, score } = previousState as WaitingForPlacement;
-    const { currentLetter, choiceCount } = newState;
-    const newScore = (newState as WaitingForPlacement).score;
-    React.useEffect(() => {
-        setTimeout(() => {
-            setGameState(newState)
-        }, GAME_WORD_SHOW_TIME);
-    }, []);
-
-    const isEndGame = newScore === 0;
-
-    const getCharacterResultEnum = (isCorrect: boolean): CharacterResultEnum => {
-        if (isEndGame) {
-            return CharacterResultEnum.SHOWING_WRONG_END_GAME;
-        }
-
-        if (hasFallen) {
-            if (isCorrect) {
-                return CharacterResultEnum.SHOWING_CORRECT_AFTER_FALL;
-            } else {
-                return CharacterResultEnum.SHOWING_WRONG_AFTER_FALL;
-            }
-        }
-
-        if (isCorrect) {
-            return CharacterResultEnum.SHOWING_CORRECT;
-        } else {
-            return CharacterResultEnum.SHOWING_WRONG_MID_GAME;
-        }
-    }
-
-    return <>
-        <View style={styles.container}>
-        <ScoreComponent score={score} newScore={newScore} bestScore={bestScore} />
-        <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-            (x: number, y: number) => tiles[x][y] ? <CharacterResult character={tiles[x][y]!} characterResult={getCharacterResultEnum(correct[x][y])}/> : <UnplacedButton onPress={() => undefined}/>
-            }/>
-        <View style={styles.characterDisplay}>
-            <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
-        </View>
+    return <View style={{
+        flexDirection: "row",
+    }}>
+        <GameComponent setGameState={setGameState} gameState={appState.state} onScorePressed={onScorePressed}/>
+        {/* <GameComponent setGameState={setGameState} gameState={appState.state} onScorePressed={onScorePressed}/> */}
     </View>
-</>
-}
-
-interface FallingTilesProps {
-    setGameState: (state: GameState) => void;
-    state: FallingTilesState
-}
-
-const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ setGameState, state }) => {
-    const { tiles, score, currentLetter, choiceCount, bestScore } = state;
-
-    React.useEffect(() => {
-        setTimeout(() => {
-            setGameState(onTilesFell(state));
-        }, FALL_SPEED * GAME_HEIGHT);
-    }, [])
-
-    return (<>
-        <View style={styles.container}>
-            <ScoreComponent score={score} bestScore={bestScore} />
-            <Grid width={GAME_WIDTH} height={GAME_HEIGHT} renderChild={
-                (x: number, y: number) => tiles[x][y].character ? <CharacterFalling character={tiles[x][y].character!} height={tiles[x][y].height} /> : <UnplacedButton onPress={() => undefined}/>
-                }/>
-            <View style={styles.characterDisplay}>
-                <CharacterDisplay character={currentLetter} choiceCount={choiceCount}/>
-            </View>
-        </View>
-    </>)
 }
 
 export default App;
