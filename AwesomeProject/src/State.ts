@@ -1,3 +1,4 @@
+import { LineScore } from "./StateTransition";
 
 export type GameTiles = (string | undefined)[][];
 
@@ -23,6 +24,7 @@ export interface FallingTilesState {
     choiceCount: number;
     score: number;
     bestScore: number;
+    scores: LineScore[];
 }
 
 export interface WaitingForPlacement {
@@ -33,6 +35,7 @@ export interface WaitingForPlacement {
     choiceCount: number;
     lastPlaced?: [x: number, y: number];
     bestScore: number;
+    scores: LineScore[];
 }
 
 export interface ShowingWords {
@@ -42,15 +45,14 @@ export interface ShowingWords {
     newState: WaitingForPlacement | FallingTilesState;
     bestScore: number;
     hasFallen: boolean;
+    scores: LineScore[];
 }
-
 
 export type GameState = WaitingForPlacement | ShowingWords | FallingTilesState;
 
 export enum AppStateType {
     PLAYING,
-    LOADING,
-    SHOW_PREVIOUS_WORDS
+    LOADING
 }
 
 export interface PlayingState {
@@ -63,14 +65,7 @@ interface LoadingState {
     type: AppStateType.LOADING;
 }
 
-interface ShowPreviousWords {
-    type: AppStateType.SHOW_PREVIOUS_WORDS;
-    state: GameState;
-    loadedBestScore: number;
-}
-
-
-export type AppState = PlayingState | LoadingState | ShowPreviousWords;
+export type AppState = PlayingState | LoadingState;
 
 
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle, Dimensions } from 'react-native';
+import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle, Dimensions, TextStyle } from 'react-native';
 import { Grid } from './src/components/Grid';
 import { sampleLetter } from './src/constants/Scrabble';
 import { getLineScore } from './src/constants/WordAlgorithm';
@@ -15,23 +15,25 @@ import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling'
 import { ScoreComponent } from './src/components/ScoreComponent';
 import { getBestScore } from './src/Util';
 import GameComponent from './src/GameComponent';
+import { PreviousWords } from './src/PreviousWords';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const styles = {
     container: {
-        flexGrow: 1, 
-        justifyContent: "center", 
-        alignItems: "center",
+        width: windowWidth,
+        height: windowHeight,
         backgroundColor: "#000000"
-    } as ViewStyle,
-    characterDisplay: {
-        marginTop: 64 
-    }
+    } as ViewStyle
 };
 
 const App = () => {
     const [appState, setAppState] = React.useState<AppState>({
         type: AppStateType.LOADING
     });
+
+    const [previousWordsModalShowing, setPreviousWordsModalShowing] = React.useState(false);
 
     React.useEffect(() => {
         getBestScore().then((score) => {
@@ -52,26 +54,16 @@ const App = () => {
     }
 
     const onScorePressed = () => {
-        console.log("On previous words")
-        setAppState({
-            type: AppStateType.SHOW_PREVIOUS_WORDS,
-            state: (appState as PlayingState).state,
-            loadedBestScore: (appState as PlayingState).loadedBestScore
-        })
+        setPreviousWordsModalShowing(true);
     }
-
 
     if (appState.type === AppStateType.LOADING) {
-        return <View/>;
+        return <View style={styles.container}/>;
     }
 
-
-
-    return <View style={{
-        flexDirection: "row",
-    }}>
-        <GameComponent setGameState={setGameState} gameState={appState.state} onScorePressed={onScorePressed}/>
-        {/* <GameComponent setGameState={setGameState} gameState={appState.state} onScorePressed={onScorePressed}/> */}
+    return <View>
+            <GameComponent setGameState={setGameState} gameState={appState.state} onScorePressed={onScorePressed}/>
+            {previousWordsModalShowing ? <PreviousWords scores={appState.state.scores} onPress={() => setPreviousWordsModalShowing(false)}/> : undefined}
     </View>
 }
 

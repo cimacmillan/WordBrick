@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle, Dimensions } from 'react-native';
+import { ScrollView, Text, View, Image, TextInput, Button, Animated, TextComponent, ViewStyle, Dimensions, TextStyle } from 'react-native';
 import { Grid } from './components/Grid';
 import { GAME_WIDTH, GAME_HEIGHT, GAME_WORD_SHOW_TIME } from "./Config";
 import { getStartingState, onTilePressed, onTilesFell } from './StateTransition';
@@ -18,6 +18,7 @@ const windowHeight = Dimensions.get('window').height;
 
 const styles = {
     container: {
+        position: "absolute",
         justifyContent: "center", 
         alignItems: "center",
         backgroundColor: "#000000",

@@ -4,12 +4,13 @@ import { GAME_HEIGHT, GAME_WIDTH } from "./Config";
 import { getLineScore } from "./constants/WordAlgorithm";
 import { setBestScore } from "./Util";
 
-interface LineScore {
+export interface LineScore {
     x1: number;
     x2: number;
     y1: number;
     y2: number;
     value: number;
+    word: string;
 }
 
 function getRow(tiles: GameTiles, row: number) {
@@ -25,24 +26,32 @@ function getScores(tiles: GameTiles): LineScore[] {
     for (let x = 0; x < GAME_WIDTH; x++) {
         const vertical = tiles[x];
         const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
+        if (vertScore === 0) {
+            continue;
+        }
         scores.push({
             x1: x,
             x2: x,
             y1: vertBegin, 
             y2: vertEnd,
-            value: vertScore
+            value: vertScore,
+            word: vertWord
         });
     }
 
     for (let y = 0; y < GAME_HEIGHT; y++) {
         const horizontal = getRow(tiles, y);
         const [horizontalScore, horzBegin, horzEnd, horzWord] = getLineScore(horizontal);
+        if (horizontalScore === 0) {
+            continue;
+        }
         scores.push({
             x1: horzBegin,
             x2: horzEnd,
             y1: y, 
             y2: y,
-            value: horizontalScore
+            value: horizontalScore,
+            word: horzWord
         });
     }
     return scores;
@@ -99,7 +108,8 @@ export function getStartingState(width: number, height: number, bestScore: numbe
         score: 0,
         currentLetter: sampleLetter(),
         choiceCount: 0,
-        bestScore
+        bestScore,
+        scores: []
     }
 }
 
@@ -167,7 +177,9 @@ export function onTilesComplete(appState: WaitingForPlacement, hasFallen: boolea
 
     for (const score of scores) {
         const { x1, x2, y1, y2, value } = score;
-        newScore += hasFallen ? value * value : value;
+        const newValue =  hasFallen ? value * value : value;
+        newScore += newValue;
+        score.value = newValue;
         forLine(x1, x2, y1, y2, (x, y) => {
             newTiles[x][y] = undefined;
             newCorrect[x][y] = true;
@@ -180,21 +192,24 @@ export function onTilesComplete(appState: WaitingForPlacement, hasFallen: boolea
         choiceCount: choiceCount + 1,
         currentLetter: sampleLetter(),
         score: newScore,
-        bestScore
+        bestScore,
+        scores: [...appState.scores, ...scores]
     } : (canTilesFall(newTiles) ?  {
         type: GameStateType.DROPPING_TILES,
         tiles: getFallingTiles(newTiles),
         choiceCount: choiceCount + 1,
         currentLetter: sampleLetter(),
         score: newScore,
-        bestScore
+        bestScore,
+        scores: [...appState.scores, ...scores]
     } : {
         type: GameStateType.WAITING_FOR_PLACEMENT,
         tiles: newTiles,
         choiceCount: choiceCount + 1,
         currentLetter: sampleLetter(),
         score: newScore,
-        bestScore
+        bestScore,
+        scores: [...appState.scores, ...scores]
     });
 
     if (score === newScore) {
@@ -206,7 +221,8 @@ export function onTilesComplete(appState: WaitingForPlacement, hasFallen: boolea
             newState: getStartingState(GAME_WIDTH, GAME_HEIGHT, newBestScore),
             correct: newCorrect,
             bestScore: newBestScore,
-            hasFallen: false
+            hasFallen: false,
+            scores: [...appState.scores, ...scores]
         }
     } else {
         return {
@@ -215,13 +231,14 @@ export function onTilesComplete(appState: WaitingForPlacement, hasFallen: boolea
             newState: newGameState,
             correct: newCorrect,
             bestScore,
-            hasFallen
+            hasFallen,
+            scores: [...appState.scores, ...scores]
         };
     }
 }
 
 export function onTilePressed(appState: WaitingForPlacement, x: number, y: number): GameState {
-    const { tiles, currentLetter, choiceCount, score, bestScore } = appState;
+    const { tiles, currentLetter, choiceCount, score, bestScore, scores } = appState;
     if (tiles[x][y]) {
         return appState;
     }
@@ -245,13 +262,14 @@ export function onTilePressed(appState: WaitingForPlacement, x: number, y: numbe
             currentLetter: sampleLetter(),
             score,
             lastPlaced: [x, y],
-            bestScore
+            bestScore,
+            scores
         };
     }
 }
 
 export function onTilesFell(appState: FallingTilesState): GameState {
-    const { tiles, currentLetter, choiceCount, score, bestScore } = appState;
+    const { tiles, currentLetter, choiceCount, score, bestScore} = appState;
     const gameTiles: GameTiles = map2DArray(tiles, GAME_WIDTH, GAME_HEIGHT, (tile) => tile.character)
     const scores = getScores(gameTiles).reduce((prev, val) => prev + val.value, 0);
 
@@ -263,6 +281,7 @@ export function onTilesFell(appState: FallingTilesState): GameState {
             choiceCount, 
             score,
             bestScore,
+            scores: appState.scores
         }, true);
     }
 
@@ -272,7 +291,8 @@ export function onTilesFell(appState: FallingTilesState): GameState {
         currentLetter,
         choiceCount, 
         score,
-        bestScore
+        bestScore,
+        scores: appState.scores
     };
 }
 
