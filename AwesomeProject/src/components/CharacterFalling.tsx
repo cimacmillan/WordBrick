@@ -22,7 +22,7 @@ export const CharacterFalling: React.FunctionComponent<CharacterFallingProps> = 
             placingAnim,
             {
             toValue: 0,
-            duration: FALL_SPEED * height,
+            duration: FALL_SPEED,
             useNativeDriver: false
             }
         ).start();

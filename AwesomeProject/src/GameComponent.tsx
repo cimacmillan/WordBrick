@@ -221,7 +221,7 @@ const FallingTilesComponent: React.FunctionComponent<FallingTilesProps> = ({ set
     React.useEffect(() => {
         setTimeout(() => {
             setGameState(onTilesFell(state));
-        }, FALL_SPEED * GAME_HEIGHT);
+        }, FALL_SPEED);
     }, [])
 
     return (<>
