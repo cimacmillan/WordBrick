@@ -2,7 +2,7 @@ import { AppState, AppStateType, FallingTile, FallingTiles, FallingTilesState, G
 import { sampleLetter } from './constants/Scrabble';
 import { GAME_HEIGHT, GAME_WIDTH } from "./Config";
 import { getLineScore } from "./constants/WordAlgorithm";
-import { setBestScore } from "./Util";
+import { setSave } from "./Util";
 
 export interface LineScore {
     x1: number;
@@ -214,11 +214,23 @@ export function onTilesComplete(appState: WaitingForPlacement, hasFallen: boolea
 
     if (score === newScore) {
         const newBestScore = score > bestScore ? score : bestScore;
-        setBestScore(newBestScore);
+        const lastPlayedDate = new Date();
+        setSave({
+            bestScore: newBestScore,
+            lastPlayed: (lastPlayedDate).toString()
+        });
         return {
             type: GameStateType.SHOWING_WORDS,
             previousState: appState,
-            newState: getStartingState(GAME_WIDTH, GAME_HEIGHT, newBestScore),
+            newState: {
+                type: GameStateType.WAITING_FOR_PLAY,
+                currentLetter: sampleLetter(),
+                scores: [],
+                lastPlayed: lastPlayedDate,
+                bestScore: newBestScore,
+                choiceCount: 0,
+                score: 0
+            },
             correct: newCorrect,
             bestScore: newBestScore,
             hasFallen: false,

@@ -13,7 +13,7 @@ import { CharacterPlaced } from './src/components/CharacterPlaced';
 import { CharacterResult, CharacterResultEnum } from './src/components/CharacterResult';
 import { CharacterFalling, FALL_SPEED } from './src/components/CharacterFalling';
 import { ScoreComponent } from './src/components/ScoreComponent';
-import { getBestScore } from './src/Util';
+import { getSave } from './src/Util';
 import GameComponent from './src/GameComponent';
 import { PreviousWords } from './src/PreviousWords';
 
@@ -36,12 +36,32 @@ const App = () => {
     const [previousWordsModalShowing, setPreviousWordsModalShowing] = React.useState(false);
 
     React.useEffect(() => {
-        getBestScore().then((score) => {
-            setAppState({
-                type: AppStateType.PLAYING,
-                state: getStartingState(GAME_WIDTH, GAME_HEIGHT, score),
-                loadedBestScore: score
-            })
+        getSave().then(({ bestScore, lastPlayed }) => {
+            const lastPlayedDate = new Date(lastPlayed);
+            const now = new Date();
+            
+            console.log(now.toDateString(), lastPlayedDate.toDateString())
+            if (now.toDateString() === lastPlayedDate.toDateString()) {
+                setAppState({
+                    type: AppStateType.PLAYING,
+                    state: {
+                        type: GameStateType.WAITING_FOR_PLAY,
+                        scores: [],
+                        bestScore,
+                        lastPlayed: lastPlayedDate,
+                        currentLetter: sampleLetter(),
+                        choiceCount: 0,
+                        score: 0
+                    },
+                    loadedBestScore: bestScore
+                })
+            } else {
+                setAppState({
+                    type: AppStateType.PLAYING,
+                    state: getStartingState(GAME_WIDTH, GAME_HEIGHT, bestScore),
+                    loadedBestScore: bestScore
+                })
+            }
         });
     }, [])
 

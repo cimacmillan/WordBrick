@@ -10,11 +10,22 @@ export interface FallingTile {
 export type FallingTiles = FallingTile[][];
 
 export enum GameStateType {
+    WAITING_FOR_PLAY = "WAITING_FOR_PLAY",
     WAITING_FOR_PLACEMENT = "WAITING_FOR_PLACEMENT",
     SHOWING_WORDS = "SHOWING_WORDS",
     DESTROYING_TILES = "DESTROYING_TILES",
     DROPPING_TILES = "DROPPING_TILES",
     GAME_OVER = "GAME_OVER"
+}
+
+export interface WaitingForPlay {
+    type: GameStateType.WAITING_FOR_PLAY,
+    scores: LineScore[],
+    lastPlayed: Date,
+    bestScore: number,
+    choiceCount: number,
+    currentLetter: string,
+    score: number,
 }
 
 export interface FallingTilesState {
@@ -42,13 +53,13 @@ export interface ShowingWords {
     type: GameStateType.SHOWING_WORDS;
     previousState: GameState;
     correct: boolean[][];
-    newState: WaitingForPlacement | FallingTilesState;
+    newState: WaitingForPlacement | FallingTilesState | WaitingForPlay;
     bestScore: number;
     hasFallen: boolean;
     scores: LineScore[];
 }
 
-export type GameState = WaitingForPlacement | ShowingWords | FallingTilesState;
+export type GameState = WaitingForPlay | WaitingForPlacement | ShowingWords | FallingTilesState;
 
 export enum AppStateType {
     PLAYING,
