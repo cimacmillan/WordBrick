@@ -25,34 +25,33 @@ function getScores(tiles: GameTiles): LineScore[] {
     const scores: LineScore[] = [];
     for (let x = 0; x < GAME_WIDTH; x++) {
         const vertical = tiles[x];
-        const [vertScore, vertBegin, vertEnd, vertWord] = getLineScore(vertical);
-        if (vertScore === 0) {
-            continue;
-        }
-        scores.push({
+        const lineScores = getLineScore(vertical);
+        console.log(lineScores);
+
+        
+        lineScores.forEach(([vertScore, vertBegin, vertEnd, vertWord]) => scores.push({
             x1: x,
             x2: x,
             y1: vertBegin, 
             y2: vertEnd,
             value: vertScore,
             word: vertWord
-        });
+        }));
     }
 
     for (let y = 0; y < GAME_HEIGHT; y++) {
         const horizontal = getRow(tiles, y);
-        const [horizontalScore, horzBegin, horzEnd, horzWord] = getLineScore(horizontal);
-        if (horizontalScore === 0) {
-            continue;
-        }
-        scores.push({
-            x1: horzBegin,
-            x2: horzEnd,
+        const lineScores = getLineScore(horizontal);
+        console.log(lineScores);
+
+        lineScores.forEach(([vertScore, vertBegin, vertEnd, vertWord]) => scores.push({
+            x1: vertBegin,
+            x2: vertEnd,
             y1: y, 
             y2: y,
-            value: horizontalScore,
-            word: horzWord
-        });
+            value: vertScore,
+            word: vertWord
+        }));
     }
     return scores;
 }

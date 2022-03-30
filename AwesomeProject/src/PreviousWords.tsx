@@ -66,7 +66,7 @@ export const PreviousWords: React.FunctionComponent<PreviousWordsProps> = ({ sco
             <Text style={styles.characterDisplay} onPress={onPress}>X</Text>
         </View>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-            { scores.reverse().map((score, index) => (
+            { scores.slice().reverse().map((score, index) => (
                 <View style={{ flexDirection: "row" }} key={`${index}-${score.word}`}>
                     <Text style={styles.wordDisplay}>{score.word}</Text>
                     <Text style={{...styles.scoreDisplay, color: score.value > 5 ? GOLD : GREEN }}>{score.value}</Text>

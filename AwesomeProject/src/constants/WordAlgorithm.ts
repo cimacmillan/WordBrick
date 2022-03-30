@@ -3,7 +3,7 @@ import { EnglishWords } from "./Words";
 const AllWords = EnglishWords.map(word => word.toUpperCase()).filter(word => word.length >= 3);
 
 // [score, begin index of line that's word, end index of line that's word]
-export function getLineScore(line: (string | undefined)[]): [number, number, number, string] {
+export function getLineScore(line: (string | undefined)[]): [number, number, number, string][] {
     // Combination of words from line with begin and end index from line
     let combinations: [string, number, number][] = [];
     const existingCombinations: {[key: string]: boolean} = {};
@@ -23,30 +23,19 @@ export function getLineScore(line: (string | undefined)[]): [number, number, num
             }
         }
     }
-
-    // for (let i = 0; i < combinations.length; i ++) {
-    //     console.log(`\"${combinations[i][0]}\"`);
-    // }
-
-    let bestScore = 0;
-    let bestBegin = 0;
-    let bestEnd = 0;
-    let bestWord = "";
+    
+    const scores: [number, number, number, string][] = [];
 
     for (let combination of combinations) {
         const [word, begin, end] = combination;
 
         const doesContain = AllWords.find(englishWord => englishWord === word);
-        if (doesContain && doesContain.length > bestScore) {
-            // console.log(doesContain, begin, end);
-            bestScore = doesContain.length;
-            bestBegin = begin;
-            bestEnd = end;
-            bestWord = doesContain;
+        if (doesContain && doesContain.length > 0) {
+            scores.push([doesContain.length, begin, end, doesContain]);
         }
     }
 
 
 
-    return [bestScore, bestBegin, bestEnd, bestWord];
+    return scores;
 }
