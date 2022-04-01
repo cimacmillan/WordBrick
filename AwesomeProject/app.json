@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "WordBrick",
-    "slug": "WordBrick",
-    "version": "1.0.9",
+    "name": "Word Brick",
+    "slug": "Word Brick",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -26,7 +26,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.cmacmillan.wordblock"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
